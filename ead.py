@@ -2,12 +2,24 @@ import subprocess
 
 
 class EAD(object):
-    extensiones = ['tar.gz', 'zip']
+    extensiones = ['tar.gz', 'zip', 'rar', 'tar.bz2']
 
     def get_name_and_ext(self, filename):
         """Separa el nombre y la extensión del archivo"""
 
-        return ('comprimido', 'tar.gz')
+        extension = ''
+        for ext in self.extensiones:
+            if filename.endswith(ext):
+                extension = ext
+                break
+
+        if extension == '':
+            raise ExtensionError
+
+        ancho_extension = len(extension)
+        nombre_sin_extension = filename[:(ancho_extension+1)*-1]
+
+        return (nombre_sin_extension, extension)
 
     def obtener_descompresor(self, extension):
         """Verifica la existencia de un compresor que pueda trabajar con el
@@ -17,12 +29,16 @@ class EAD(object):
 
         return '/bin/tar xvf {compressed} -C {outdir}'
 
-    def ajustar_directorio_final(self, lista_archivos_descomprimidos):
+    def ajustar_directorio_final(
+            self, nombre_archivo, lista_archivos_descomprimidos):
         """Ajusta el directorio final, de modo que todo quede dentro de un
         directorio.
         """
 
-        return 'comprimido'
+        if len(lista_archivos_descomprimidos) > 1:
+            return nombre_archivo
+
+        return lista_archivos_descomprimidos[0]
 
     def validar_existencia_archivo(self, filename):
         """Valida la existencia del archivo en el directorio actual"""
@@ -68,6 +84,10 @@ class EAD(object):
         # results = subprocess.run(
         #     cmd, shell=True, stdout=subprocess.PIP, stderr=subprocess.PIPE)
         # results.check_returncode()
+
+
+class ExtensionError(Exception):
+    pass
 
 
 if __name__ == '__main__':
