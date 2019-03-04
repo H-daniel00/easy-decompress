@@ -1,4 +1,5 @@
 import click
+from ead import EAD
 
 
 ###############################################################
@@ -9,7 +10,8 @@ import click
 @click.argument('filename')
 def cli(filename):
     """Easy Decompress"""
-    click.echo('nombre archivo: ' + filename)
+    ead = EAD()
+    ead.descomprimir(filename)
 
 
 if __name__ == '__main__':

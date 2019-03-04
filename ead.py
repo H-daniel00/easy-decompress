@@ -1,4 +1,4 @@
-import subprocess
+import subprocess, os
 
 
 class EAD(object):
@@ -58,6 +58,8 @@ class EAD(object):
         if results.returncode > 0:
             raise Exception(results.stderr)
 
+        return nombre_directorio
+
     def descomprimir(self, filename):
         if not self.validar_existencia_archivo:
             raise Exception(
@@ -78,12 +80,19 @@ class EAD(object):
                 'Esta utilidad no puede funcionar si existe un '
                 'directorio "{}"'.format(nombre_archivo))
 
-        self.crear_directorio_salida(nombre_archivo)
-        cmd = descompresor.format(compressed=filename, outdir=nombre_archivo)
-        print(cmd)
-        # results = subprocess.run(
-        #     cmd, shell=True, stdout=subprocess.PIP, stderr=subprocess.PIPE)
-        # results.check_returncode()
+        # Crea directorio
+        # Descomprime en directorio
+        # Si directorio queda con más de un archivo, finaliza
+        # Si directorio solo con un fichero, mover ese fichero la directorio padre; borrar el directorio y finalizar
+        directorio_salida = self.crear_directorio_salida(nombre_archivo)
+        cmd = descompresor.format(
+                compressed=filename, outdir=directorio_salida)
+        lista_archivos = os.listdir(directorio_salida)
+        directorio_final = self.ajustar_directorio_final(
+                directorio_salida, lista_archivos)
+        results = subprocess.run(
+            cmd, shell=True, stdout=subprocess.PIP, stderr=subprocess.PIPE)
+        results.check_returncode()
 
 
 class ExtensionError(Exception):
